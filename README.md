@@ -4,12 +4,12 @@
 
 Sales Intel AI helps sales teams analyze high-value commercial situations and generate practical objection-handling guidance, discovery questions, root-cause analysis, and value-positioning strategies.
 
-The application combines structured sales inputs, a transcript-based RAG knowledge base, Google Gemini, credit-based usage, subscription billing, and an administrative console into one SaaS platform.
+The application combines structured sales inputs, transcript-based RAG, Google Gemini, credit-based usage, subscription billing, and an administrative console into one SaaS platform.
 
 ## Features
 
-- **Sales Intelligence Reports** - Generate structured guidance from the product, target industry, business model, deal size, buyer type, and additional context.
-- **Objection Handling** - Produce practical responses, discovery questions, root-cause analysis, and value-positioning guidance.
+- **Sales Intelligence Reports** - Generate structured guidance from product, industry, business model, deal size, buyer type, and additional context.
+- **Objection Handling** - Generate practical responses, discovery questions, root-cause analysis, and value-positioning guidance.
 - **Transcript-based RAG** - Ground AI responses using approved sales-methodology video transcripts.
 - **Credit-based usage** - AI generations consume credits from a server-side credit ledger.
 - **Four access models**
@@ -20,12 +20,28 @@ The application combines structured sales inputs, a transcript-based RAG knowled
 - **Razorpay payments** - Supports one-time checkout and recurring monthly subscriptions with server-side signature and webhook verification.
 - **Authentication and authorization** - JWT-based authentication with role-aware admin access.
 - **Admin Console** - Manage users, credits, plans, transcripts, and audit logs.
-- **Security controls** - Server-side entitlement checks, input validation, rate limiting, audit logging, idempotent credit/payment operations, and prompt-injection defenses.
-- **Responsive UI** - Built for desktop and mobile workflows.
+- **Security controls** - Server-side entitlement checks, input validation, rate limiting, audit logging, idempotency, and prompt-injection defenses.
+- **Responsive UI** - Designed for desktop and mobile workflows.
+
+## Screenshots
+
+### Landing Page
+
+![Sales Intel AI landing page](docs/screenshots/01-home.png)
+
+### Sales Objection Handling Assistant
+
+![Sales Objection Handling Assistant](docs/screenshots/02-assistant.png)
+
+### Pricing and Plans
+
+![Sales Intel AI pricing and plans](docs/screenshots/03-pricing.png)
+
+### Methodology / RAG Experience
+
+![Sales Intel AI methodology experience](docs/screenshots/04-methodology.png)
 
 ## SaaS Plans
-
-Plans are configurable through the application/database rather than hard-coded into the UI.
 
 | Plan | Type | Access | Credits | Renewal |
 |---|---|---|---:|---|
@@ -34,7 +50,7 @@ Plans are configurable through the application/database rather than hard-coded i
 | Monthly Pro | Subscription | Monthly | 150 | Recurring |
 | One-Time Growth Pass | One-time | Configurable validity | 500 | None |
 
-> Pricing, credit quantities, trial duration, and plan settings should be treated as deployment configuration. The server is authoritative for balances, entitlements, and payment state.
+> Pricing, credit quantities, trial duration, and plan settings are configurable. The server is authoritative for balances, entitlements, and payment state.
 
 ## How It Works
 
@@ -60,7 +76,7 @@ Next.js Web Application
 PostgreSQL / Supabase
 ```
 
-### AI and RAG flow
+### AI and RAG Flow
 
 ```text
 Sales Context
@@ -78,7 +94,7 @@ Grounded Gemini Prompt
 Structured Sales Intelligence Report
 ```
 
-Transcript content is treated as untrusted retrieved context. The application validates and bounds retrieved material and applies prompt-injection defenses before it is supplied to the model.
+Transcript content is treated as untrusted retrieved context. The application validates and bounds retrieved material and applies prompt-injection defenses before supplying it to the model.
 
 ## Tech Stack
 
@@ -163,6 +179,8 @@ sales-intel-ai/
 │       ├── 002_production_hardening.sql
 │       └── 003_production_hardening_v2.sql
 ├── public/
+├── docs/
+│   └── screenshots/
 ├── .env.example
 ├── package.json
 ├── package-lock.json
@@ -174,7 +192,7 @@ sales-intel-ai/
 
 ### Prerequisites
 
-- Node.js 18+ (Node.js 24 has been used during development)
+- Node.js 18+
 - npm 10+
 
 ### Install
@@ -183,7 +201,7 @@ sales-intel-ai/
 npm install
 ```
 
-### Configure environment
+### Configure Environment
 
 Copy the example environment file:
 
@@ -197,9 +215,11 @@ On Windows PowerShell:
 Copy-Item .env.example .env.local
 ```
 
-Fill in the required local development values. **Never commit `.env.local` or other files containing secrets.**
+Fill in the required local development values.
 
-### Run the application
+**Never commit `.env.local` or other files containing secrets.**
+
+### Run
 
 ```bash
 npm run dev
@@ -211,7 +231,7 @@ Open:
 http://localhost:3000
 ```
 
-### Validate the project
+### Validate
 
 ```bash
 npm test
@@ -236,7 +256,7 @@ Important production variables include:
 - `RAZORPAY_WEBHOOK_SECRET`
 - `NEXT_PUBLIC_APP_URL`
 
-Additional plan and administrator configuration is documented in `.env.example`.
+Additional configuration is documented in `.env.example`.
 
 **Never commit real API keys, passwords, JWT secrets, database credentials, or webhook secrets.**
 
@@ -252,9 +272,9 @@ For a fresh database, apply the migrations in order:
 003_production_hardening_v2.sql
 ```
 
-For an existing production database, review the migration state and take a backup before applying schema changes.
+For an existing database, review the migration state and take a backup before applying schema changes.
 
-The production application expects PostgreSQL to be available; it should not silently fall back to an in-memory database in production.
+Production requires PostgreSQL and should not silently fall back to an in-memory database.
 
 ## Razorpay Configuration
 
@@ -268,13 +288,11 @@ The application supports:
 
 For monthly subscriptions, the corresponding Razorpay recurring plan must be configured in Razorpay and its provider plan ID stored with the application's monthly plan configuration.
 
-Configure the Razorpay webhook endpoint as:
+Configure the webhook endpoint as:
 
 ```text
 https://YOUR-DOMAIN/api/payments/webhook
 ```
-
-Use the webhook events required by the application's subscription/payment handlers, including payment capture/order payment events and the supported subscription lifecycle events.
 
 Do not place Razorpay secrets in source code.
 
@@ -307,8 +325,8 @@ The application is designed around server-side enforcement:
 - API payloads are validated with Zod.
 - Production configuration fails closed when required infrastructure is unavailable.
 - Audit logs redact sensitive fields.
-- Production rate limiting is designed to use shared infrastructure rather than process-local state.
-- AI prompts distinguish system instructions from user/retrieved content.
+- Production rate limiting is designed for shared infrastructure.
+- AI prompts distinguish system instructions from user and retrieved content.
 
 ## Testing
 
@@ -318,7 +336,7 @@ Run:
 npm test
 ```
 
-The test suite covers core areas including:
+The automated tests cover core areas including:
 
 - Authentication and password handling
 - Trial enforcement
@@ -342,25 +360,21 @@ before deployment.
 
 The application can be deployed to a Node-compatible cloud platform such as Vercel or Google Cloud Run.
 
-A typical production sequence is:
+Typical production setup:
 
-1. Create/configure a PostgreSQL or Supabase database.
+1. Configure PostgreSQL/Supabase.
 2. Apply the database migrations in order.
 3. Configure Gemini credentials.
-4. Configure Razorpay test-mode credentials and recurring plan.
-5. Configure the production environment variables.
+4. Configure Razorpay and the recurring monthly plan.
+5. Add production environment variables.
 6. Deploy the Next.js application.
 7. Configure the Razorpay webhook URL.
-8. Test registration, free usage, trial activation, one-time payment, monthly subscription, credit consumption, and webhook processing.
-9. Review audit logs and application errors.
-10. Move Razorpay to live mode only after successful test-mode validation.
-
-## License
-
-This project is provided for demonstration, development, and deployment purposes. Add an explicit open-source license before presenting the repository as an open-source project.
+8. Test free usage, trial activation, one-time payment, monthly subscription, credit consumption, and webhook processing.
+9. Review application logs and audit events.
+10. Switch Razorpay to live mode only after successful test-mode validation.
 
 ## Project Status
 
 **Production-oriented SaaS implementation**
 
-The repository contains the application source, database migrations, automated tests, and deployment configuration template. Production deployment still requires external service configuration such as PostgreSQL/Supabase, Google Gemini, Razorpay, secrets, and the target hosting platform.
+The repository contains the application source, database migrations, automated tests, screenshots, and environment configuration template. External production services still require their own credentials and configuration.
