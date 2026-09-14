@@ -1,163 +1,366 @@
-# Sales Objection Handling Assistant — Production SaaS Platform
+# Sales Intel AI
 
-An enterprise-grade, subscription-based SaaS web application built from scratch around Manuj Bajaj's proprietary sales methodologies. The platform diagnoses high-ticket commercial situations, retrieves tactical video transcripts via Retrieval-Augmented Generation (RAG), and synthesizes word-for-word objection handling scripts, root-cause analyses, discovery questions, and value positioning playbooks.
+**AI-powered Sales Objection Handling Assistant and Sales Intelligence SaaS**
 
----
+Sales Intel AI helps sales teams analyze high-value commercial situations and generate practical objection-handling guidance, discovery questions, root-cause analysis, and value-positioning strategies.
 
-## 1. Project Overview & Architecture
+The application combines structured sales inputs, a transcript-based RAG knowledge base, Google Gemini, credit-based usage, subscription billing, and an administrative console into one SaaS platform.
 
-The application is built on **Next.js 16 (App Router)** with **TypeScript**, **Tailwind CSS**, a **Double-Entry Credit Ledger**, strict **Server-Side UTC 30-Day Trial Enforcement**, **Razorpay Payment Integration** with HMAC signature verification, **RAG Knowledge Base indexing**, and **Google Gemini 1.5 Flash**.
+## Features
 
-### Key Architectural Tenets:
-1. **Zero Client-Side Trust**:
-   - The browser is never trusted for entitlement status, credit balance, trial eligibility, or payment verification.
-   - All balance mutations happen via server-side atomic ledger entries.
-2. **Server-Side UTC Trial Enforcement**:
-   - Trial status is evaluated against server/database UTC timestamps. Tampering with laptop, mobile, or browser clock has zero effect on trial validity.
-   - Strict single-use trial constraint prevents trial reset abuse.
-3. **Double-Entry Credit Accounting**:
-   - Each credit deduction or top-up creates an append-only transaction in the ledger (`credit_transactions`) with before/after balances, idempotency keys, and mutex concurrency locks to eliminate race conditions.
-4. **Proprietary Video Transcript RAG Pipeline**:
-   - Ingests Manuj Bajaj's video transcripts, splits them into semantic overlapping chunks, indexes them, and semantically injects the most relevant methodologies into Gemini prompts.
-   - Defensive prompt engineering neutralizes prompt injection attacks.
-5. **HMAC Webhook & Payment Verification**:
-   - Verifies Razorpay checkout signatures and webhook event signatures using SHA-256 HMAC.
-   - Idempotent fulfillment prevents duplicate credit grants from webhook replays.
+- **Sales Intelligence Reports** - Generate structured guidance from the product, target industry, business model, deal size, buyer type, and additional context.
+- **Objection Handling** - Produce practical responses, discovery questions, root-cause analysis, and value-positioning guidance.
+- **Transcript-based RAG** - Ground AI responses using approved sales-methodology video transcripts.
+- **Credit-based usage** - AI generations consume credits from a server-side credit ledger.
+- **Four access models**
+  - Always Free
+  - Free 1-Month Trial
+  - Monthly Subscription
+  - One-Time Purchase
+- **Razorpay payments** - Supports one-time checkout and recurring monthly subscriptions with server-side signature and webhook verification.
+- **Authentication and authorization** - JWT-based authentication with role-aware admin access.
+- **Admin Console** - Manage users, credits, plans, transcripts, and audit logs.
+- **Security controls** - Server-side entitlement checks, input validation, rate limiting, audit logging, idempotent credit/payment operations, and prompt-injection defenses.
+- **Responsive UI** - Built for desktop and mobile workflows.
 
----
+## SaaS Plans
 
-## 2. SaaS Plans & Business Model
+Plans are configurable through the application/database rather than hard-coded into the UI.
 
-The system implements four distinct, configurable plan tiers:
+| Plan | Type | Access | Credits | Renewal |
+|---|---|---|---:|---|
+| Always Free | Free | Ongoing | 5 | None |
+| Free 1-Month Trial | Trial | 30 days | 25 | None |
+| Monthly Pro | Subscription | Monthly | 150 | Recurring |
+| One-Time Growth Pass | One-time | Configurable validity | 500 | None |
 
-| Plan Name | Type | Price (INR) | Duration | AI Credits | Renewal Behavior |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **Always Free** | `free` | ₹0 | Unlimited | 5 Lifetime | None |
-| **Free 1-Month Trial** | `trial` | ₹0 | 30 Days | 25 Credits | 1-time per verified account |
-| **Monthly Pro Subscription** | `monthly` | ₹2,499 | 30 Days | 150 Credits | Monthly Reset / Recurring |
-| **One-Time Growth Pass** | `onetime` | ₹6,999 | 365 Days | 500 Credits | Non-expiring Accumulation |
+> Pricing, credit quantities, trial duration, and plan settings should be treated as deployment configuration. The server is authoritative for balances, entitlements, and payment state.
 
-*All prices, credit quotas, trial days, and features are fully configurable via `.env` or the Admin Dashboard.*
+## How It Works
 
----
-
-## 3. Tech Stack
-
-- **Frontend**: Next.js 16 (App Router), React 19, Tailwind CSS, Lucide Icons.
-- **Backend**: Next.js Server Actions & API Routes with Zod validation.
-- **Security**: JWT (`jsonwebtoken`), `bcryptjs`, HMAC-SHA256, Sliding Window Rate Limiting, Audit Logging.
-- **AI & RAG**: Google Gen AI SDK (`@google/genai` with Gemini 1.5 Flash), Vector Cosine Retrieval.
-- **Payments**: Razorpay Node.js SDK with Webhook idempotency.
-- **Testing**: Vitest test suite covering Auth, UTC Trial, Ledger, Payments, RAG, and AI Prompt Defense.
-
----
-
-## 4. Directory Structure
-
+```text
+User
+  |
+  v
+Next.js Web Application
+  |
+  +--> Authentication / Entitlement Checks
+  |
+  +--> Credit Ledger
+  |
+  +--> Sales Intelligence API
+  |       |
+  |       +--> Transcript RAG / pgvector
+  |       |
+  |       +--> Google Gemini
+  |
+  +--> Razorpay Checkout / Webhooks
+  |
+  v
+PostgreSQL / Supabase
 ```
-c:/Internshala_projects/Graybox/
-├── supabase/
-│   └── migrations/
-│       └── 001_initial_schema.sql       # Full PostgreSQL & pgvector schema
+
+### AI and RAG flow
+
+```text
+Sales Context
+     |
+     v
+Validated API Request
+     |
+     v
+Relevant Transcript Chunks
+     |
+     v
+Grounded Gemini Prompt
+     |
+     v
+Structured Sales Intelligence Report
+```
+
+Transcript content is treated as untrusted retrieved context. The application validates and bounds retrieved material and applies prompt-injection defenses before it is supplied to the model.
+
+## Tech Stack
+
+### Frontend
+- Next.js 16 App Router
+- React 19
+- TypeScript
+- Tailwind CSS
+- Lucide React
+
+### Backend
+- Next.js API Routes
+- Zod validation
+- JWT authentication
+- bcrypt password hashing
+
+### Database
+- PostgreSQL / Supabase
+- pgvector for semantic transcript retrieval
+- Server-side credit ledger
+- Audit logging
+- Payment and subscription records
+
+### AI
+- Google Gen AI SDK (`@google/genai`)
+- Google Gemini
+- Gemini Embeddings for transcript retrieval
+- Structured model output with schema validation
+
+### Payments
+- Razorpay
+- HMAC-SHA256 checkout verification
+- Signed webhook verification
+- Idempotent payment/subscription fulfillment
+
+### Testing
+- Vitest
+- TypeScript type checking
+- Production build validation
+
+## Project Structure
+
+```text
+sales-intel-ai/
 ├── src/
 │   ├── app/
 │   │   ├── api/
-│   │   │   ├── admin/                   # Admin endpoints (users, credits, transcripts, audit)
-│   │   │   ├── assistant/generate/      # Core Sales Intelligence AI generation endpoint
-│   │   │   ├── auth/                    # Register, login, me, logout endpoints
-│   │   │   ├── payments/                # Create-order, verify, webhook handlers
-│   │   │   ├── plans/                   # Dynamic plan catalog endpoint
-│   │   │   ├── trial/start/             # 30-day trial activation endpoint
-│   │   │   └── user/                    # Balance and usage telemetry
-│   │   ├── admin/page.tsx               # Admin Console (Transcripts, Users, Ledger, Logs)
-│   │   ├── assistant/page.tsx           # Sales Objection Handling Assistant UI
-│   │   ├── billing/page.tsx             # Billing, Subscription Checkout, & Ledger Statement
-│   │   ├── dashboard/page.tsx           # User Dashboard with UTC Trial Countdown
-│   │   ├── login/page.tsx               # Sign In
-│   │   ├── register/page.tsx            # Sign Up
-│   │   ├── pricing/page.tsx             # 4-Tier Public Pricing Table
-│   │   └── page.tsx                     # Modern Landing Page with Methodology breakdown
+│   │   │   ├── admin/
+│   │   │   ├── assistant/generate/
+│   │   │   ├── auth/
+│   │   │   ├── payments/
+│   │   │   ├── plans/
+│   │   │   ├── trial/
+│   │   │   └── user/
+│   │   ├── admin/
+│   │   ├── assistant/
+│   │   ├── billing/
+│   │   ├── dashboard/
+│   │   ├── login/
+│   │   ├── pricing/
+│   │   ├── register/
+│   │   └── page.tsx
 │   ├── components/
-│   │   └── Navbar.tsx                   # Responsive navigation bar with real-time balance
+│   │   └── Navbar.tsx
 │   ├── lib/
-│   │   ├── ai.ts                        # Gemini AI orchestration & prompt defense
-│   │   ├── audit.ts                     # Secret-sanitized security audit logger
-│   │   ├── auth.ts                      # JWT authentication & role enforcement
-│   │   ├── credits.ts                   # Ledger-backed credit accounting & concurrency locks
-│   │   ├── db.ts                        # Database abstraction & memory store with defaults
-│   │   ├── payments.ts                  # Razorpay signature verification & fulfillment
-│   │   ├── rag.ts                       # Transcript chunker & semantic retrieval
-│   │   ├── ratelimit.ts                 # Sliding-window rate limiter
-│   │   └── trial.ts                     # Strict server UTC trial management
+│   │   ├── ai.ts
+│   │   ├── audit.ts
+│   │   ├── auth.ts
+│   │   ├── credits.ts
+│   │   ├── db.ts
+│   │   ├── payments.ts
+│   │   ├── rag.ts
+│   │   ├── ratelimit.ts
+│   │   └── trial.ts
 │   ├── test/
-│   │   └── saas.test.ts                 # Comprehensive Vitest test suite (18 tests)
+│   │   └── saas.test.ts
 │   └── types/
-│       └── index.ts                     # Core TypeScript domain models
-├── .env.example                         # Production environment template
-├── .env.local                           # Local development configuration
-└── vitest.config.ts                     # Vitest configuration
+│       └── index.ts
+├── supabase/
+│   └── migrations/
+│       ├── 001_initial_schema.sql
+│       ├── 002_production_hardening.sql
+│       └── 003_production_hardening_v2.sql
+├── public/
+├── .env.example
+├── package.json
+├── package-lock.json
+├── tsconfig.json
+└── vitest.config.ts
 ```
 
----
-
-## 5. Local Setup & Running
+## Local Development
 
 ### Prerequisites
-- Node.js v18+ (tested on Node v24.18.1)
-- npm v10+
 
-### Installation & Execution
+- Node.js 18+ (Node.js 24 has been used during development)
+- npm 10+
+
+### Install
+
 ```bash
-# 1. Install dependencies
 npm install
+```
 
-# 2. Run automated test suite (all 18 unit & integration tests)
-npm test
+### Configure environment
 
-# 3. Verify TypeScript type safety
-npm run typecheck
+Copy the example environment file:
 
-# 4. Run production build
-npm run build
+```bash
+cp .env.example .env.local
+```
 
-# 5. Start development server
+On Windows PowerShell:
+
+```powershell
+Copy-Item .env.example .env.local
+```
+
+Fill in the required local development values. **Never commit `.env.local` or other files containing secrets.**
+
+### Run the application
+
+```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+Open:
 
-### Initial Admin Account Setup
-Configure `INITIAL_ADMIN_EMAIL` and `INITIAL_ADMIN_PASSWORD` in `.env.local` to seed the administrative account during initial deployment.
+```text
+http://localhost:3000
+```
 
----
+### Validate the project
 
-## 6. Testing Summary
+```bash
+npm test
+npm run typecheck
+npm run build
+```
 
-Run the automated test suite anytime with:
+## Environment Variables
+
+The repository contains `.env.example` as a safe configuration template.
+
+Important production variables include:
+
+- `DATABASE_URL`
+- `JWT_SECRET`
+- `GEMINI_API_KEY`
+- `GEMINI_MODEL`
+- `GEMINI_EMBEDDING_MODEL`
+- `EMBEDDING_DIMENSION`
+- `NEXT_PUBLIC_RAZORPAY_KEY_ID`
+- `RAZORPAY_KEY_SECRET`
+- `RAZORPAY_WEBHOOK_SECRET`
+- `NEXT_PUBLIC_APP_URL`
+
+Additional plan and administrator configuration is documented in `.env.example`.
+
+**Never commit real API keys, passwords, JWT secrets, database credentials, or webhook secrets.**
+
+## Database Setup
+
+The SQL migrations in `supabase/migrations/` define the PostgreSQL schema, credit operations, vector search support, payment/subscription support, and production hardening.
+
+For a fresh database, apply the migrations in order:
+
+```text
+001_initial_schema.sql
+002_production_hardening.sql
+003_production_hardening_v2.sql
+```
+
+For an existing production database, review the migration state and take a backup before applying schema changes.
+
+The production application expects PostgreSQL to be available; it should not silently fall back to an in-memory database in production.
+
+## Razorpay Configuration
+
+The application supports:
+
+- One-time Razorpay checkout
+- Recurring monthly subscriptions
+- Server-side checkout signature verification
+- Signed webhook verification
+- Idempotent fulfillment
+
+For monthly subscriptions, the corresponding Razorpay recurring plan must be configured in Razorpay and its provider plan ID stored with the application's monthly plan configuration.
+
+Configure the Razorpay webhook endpoint as:
+
+```text
+https://YOUR-DOMAIN/api/payments/webhook
+```
+
+Use the webhook events required by the application's subscription/payment handlers, including payment capture/order payment events and the supported subscription lifecycle events.
+
+Do not place Razorpay secrets in source code.
+
+## Transcript Methodology / RAG
+
+Administrators can add approved sales-methodology transcripts through the admin interface.
+
+The ingestion pipeline:
+
+1. Accepts transcript content.
+2. Validates and bounds the input.
+3. Splits content into overlapping chunks.
+4. Generates embeddings.
+5. Stores vectors in PostgreSQL/pgvector.
+6. Retrieves relevant chunks for a sales query.
+7. Supplies retrieved context to Gemini as bounded reference material.
+
+The model is instructed not to treat retrieved transcript content as system instructions.
+
+## Security
+
+The application is designed around server-side enforcement:
+
+- Authentication is verified on the server.
+- Database roles are authoritative for authorization.
+- Credit mutations use atomic database operations and idempotency controls.
+- Payment signatures are verified server-side.
+- Razorpay webhooks are signature-checked and processed idempotently.
+- Trial eligibility and expiry are enforced using server/database timestamps.
+- API payloads are validated with Zod.
+- Production configuration fails closed when required infrastructure is unavailable.
+- Audit logs redact sensitive fields.
+- Production rate limiting is designed to use shared infrastructure rather than process-local state.
+- AI prompts distinguish system instructions from user/retrieved content.
+
+## Testing
+
+Run:
+
 ```bash
 npm test
 ```
-The test suite validates:
-1. **Authentication**: Registration with initial 5 free credits, duplicate prevention, password hashing, and login.
-2. **Trial Enforcement**: 30-day UTC start, rejection of client clock manipulation, single-use trial restriction.
-3. **Credit Accounting**: Atomic deduction, overdraft prevention, idempotency on duplicate requests, and concurrent request safety.
-4. **Payments**: Order creation, HMAC signature verification, rejection of forged signatures, and idempotent webhook fulfillment.
-5. **RAG Knowledge Base**: Overlapping text chunking, transcript indexing, and semantic keyword retrieval.
-6. **AI Defense**: Comprehensive Sales Intelligence report generation and neutralization of prompt injection attempts.
 
----
+The test suite covers core areas including:
 
-## 7. Production Deployment Instructions
+- Authentication and password handling
+- Trial enforcement
+- Credit balance and idempotency
+- Payment signature validation
+- Payment fulfillment
+- RAG processing
+- AI output validation
+- Prompt-injection defenses
 
-### Vercel / Cloud Deployment:
-1. Push repository to GitHub/GitLab.
-2. Connect repository to [Vercel](https://vercel.com).
-3. Set the production environment variables from `.env.example`:
-   - `DATABASE_URL` (Supabase or direct PostgreSQL connection string)
-   - `JWT_SECRET` (Generate a 64-character random string)
-   - `GEMINI_API_KEY` (From Google AI Studio)
-   - `NEXT_PUBLIC_RAZORPAY_KEY_ID` & `RAZORPAY_KEY_SECRET` (From Razorpay Dashboard)
-   - `RAZORPAY_WEBHOOK_SECRET` (From Razorpay Webhook settings)
-4. In your Supabase/PostgreSQL database, execute `supabase/migrations/001_initial_schema.sql` to apply tables and indexes.
-5. Configure your Razorpay Webhook URL to:
-   `https://your-production-domain.com/api/payments/webhook` with event subscriptions for `payment.captured` and `order.paid`.
+Also run:
+
+```bash
+npm run typecheck
+npm run build
+```
+
+before deployment.
+
+## Deployment
+
+The application can be deployed to a Node-compatible cloud platform such as Vercel or Google Cloud Run.
+
+A typical production sequence is:
+
+1. Create/configure a PostgreSQL or Supabase database.
+2. Apply the database migrations in order.
+3. Configure Gemini credentials.
+4. Configure Razorpay test-mode credentials and recurring plan.
+5. Configure the production environment variables.
+6. Deploy the Next.js application.
+7. Configure the Razorpay webhook URL.
+8. Test registration, free usage, trial activation, one-time payment, monthly subscription, credit consumption, and webhook processing.
+9. Review audit logs and application errors.
+10. Move Razorpay to live mode only after successful test-mode validation.
+
+## License
+
+This project is provided for demonstration, development, and deployment purposes. Add an explicit open-source license before presenting the repository as an open-source project.
+
+## Project Status
+
+**Production-oriented SaaS implementation**
+
+The repository contains the application source, database migrations, automated tests, and deployment configuration template. Production deployment still requires external service configuration such as PostgreSQL/Supabase, Google Gemini, Razorpay, secrets, and the target hosting platform.
