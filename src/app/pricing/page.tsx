@@ -15,6 +15,7 @@ type Plan = {
   id: string;
   name: string;
   description?: string | null;
+  type?: string | null;
   price_inr: number;
   billing_period?: string | null;
   credits: number;
@@ -22,7 +23,7 @@ type Plan = {
 };
 
 function isMonthly(plan: Plan) {
-  return String(plan.billing_period || '').toLowerCase() === 'monthly';
+  return String(plan.type ?? plan.billing_period ?? '').toLowerCase() === 'monthly';
 }
 
 function isFree(plan: Plan) {
